@@ -2,8 +2,6 @@
 #include "chat.h"
 #include "chat.cpp"
 
-
-
 int main()
 {
     setlocale(LC_ALL, "");
