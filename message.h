@@ -1,8 +1,7 @@
-﻿#pragma once
+#pragma once
 #include <iostream>
 #include <string>
 #include <ctime>
-
 
 class Message
 {
@@ -11,7 +10,6 @@ private:
     const std::string _to;
     const std::string _text;
     const std::time_t _timestamp;
-
 
 public:
     ~Message() = default;
