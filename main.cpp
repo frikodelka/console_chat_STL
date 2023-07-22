@@ -1,8 +1,6 @@
-﻿#include <iostream>
+#include <iostream>
 #include "chat.h"
 #include "chat.cpp"
-
-
 
 int main()
 {
