@@ -1,4 +1,6 @@
 # console_chat_STL
+
+console_chat v0.2
 console_chat v0.1
 
 v0.0: console_chat (Authors: @tigra38, @Aldi586, @frikodelka)
