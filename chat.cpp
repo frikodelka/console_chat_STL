@@ -1,21 +1,22 @@
-﻿#include "chat.h"
+#include "chat.h"
 #include "message.h"
 #include <string>
 #include <chrono>
 #include <ctime>
 #include <exception>
 
-#pragma warning(disable : 4996)
 
 using namespace std;
 using chrono::system_clock;
+
+#pragma warning(disable : 4996) // Отключает предупреждение компилятора С4996, связанное с 'ctime'
 
 class bad_login : public exception
 {
 public:
     const char* what() const noexcept override
     {
-        return "Слишком много неудачных попыток входа в систему";
+        return "Too many failed login attempts";
     }
 };
 
@@ -24,7 +25,7 @@ class bad_password : public exception
 public:
     const char* what() const noexcept override
     {
-        return "Слишком много неудачных попыток ввода пароля систему";
+        return "Too many failed attempts to enter the system password";
     }
 };
 
@@ -38,7 +39,7 @@ template <typename T> void Chat<T>::getCurrentUser() const
     if (currentUser != nullptr) {
         cout << currentUser->get_login() << endl;
     }
-    else cout << "Нет зарегестрированных пользователей" << endl;
+    else cout << "No registered users" << endl;
 }
 
 template <typename T> void Chat<T>::loginOperation() {
@@ -48,23 +49,23 @@ template <typename T> void Chat<T>::loginOperation() {
 
     for (size_t try_num = 0; try_num < 6; ++try_num)
     {
-        cout << "Войдите в систему. Введите логин:" << endl;
+        cout << "Log in. Enter your username:" << endl;
         cin >> login;
-        if (login != "") 
+        if (login != "")
         {
             break;
         }
-        if (login == "" && try_num < 5) 
+        if (login == "" && try_num < 5)
         {
-            cout << "Логин не введен! Попробуйте еще раз!" << try_num + 1 << endl;
+            cout << "Login not entered! Try again!" << try_num + 1 << endl;
         }
         else throw bad_login();
     }
     bool success = false;
 
     it = _users.find(login);
- 
-    if (it != _users.end()) 
+
+    if (it != _users.end())
     {
         success = true;
     }
@@ -72,26 +73,26 @@ template <typename T> void Chat<T>::loginOperation() {
     if (success) {
         for (size_t try_num = 0; try_num < 6; ++try_num)
         {
-            cout << "Введите пароль:" << endl;
+            cout << "Enter the password:" << endl;
             cin >> password;
-            
+
             if (it->second == password)
             {
                 break;
             }
             if (try_num < 5) {
-                cout << "Неверный пароль! Попробуйте еще раз" << endl;
+                cout << "Invalid password! Try again" << endl;
             }
             else throw bad_password();
         }
         system("cls");
-        cout << "Добро пожаловать, " << it->first << endl;
+        cout << "Welcome, " << it->first << endl;
         this->setCurrentUser(it->first);
         cout << endl;
         this->userMenu();
     }
     else {
-        cout << "Такой пользователь не зарегестрирован" << endl;
+        cout << "Such a user is not registered" << endl;
     }
 }
 
@@ -103,28 +104,28 @@ template <typename T> void Chat<T>::logoutOperation() {
 template <typename T> void Chat<T>::addUser()
 {
     T login, password;
-    cout << "Регистрация нового пользователя. Введите логин:" << endl;
+    cout << "Registration of a new user. Enter your username:" << endl;
     cin >> login;
     bool error = true;
-    if (login == "") cout << "Вы не ввели данные" << endl;
-    else if (login == "all") cout << "Пользователя 'all' запрещено использовать" << endl;
+    if (login == "") cout << "You have not entered the data" << endl;
+    else if (login == "all") cout << "The user 'all' is forbidden to use" << endl;
     else
     {
         error = false;
-        
+
         map<std::string, std::string>::iterator it = _users.find(login);
         if (it != _users.end())
-            {
-                cout << "Пользователь с таким именем уже зарегистрирован";
-                error = true;
-            }
+        {
+            cout << "A user with this name is already registered";
+            error = true;
+        }
     }
     if (!error)
     {
-        cout << "Введите пароль:" << endl;
+        cout << "Enter the password:" << endl;
         cin >> password;
         _users.emplace(login, password);
-        cout << "Пользователь добавлен" << endl;
+        cout << "User added!" << endl;
     }
 }
 
@@ -152,24 +153,24 @@ template <typename T> void Chat<T>::createMessage(bool toAll)
     else
     {
         while (1) {
-            cout << "Пользователи онлайн:" << endl;
+            cout << "Online Users: " << endl;
             showUsersByLogin();
-            cout << "Введите логин получателя: " << endl;
+            cout << "Enter the recipient's login: " << endl;
             cin >> to;
             if (to == currentUser) {
-                cout << "Вы не можете отправить сообщение самому себе" << endl;
+                cout << "You can't send a message to yourself" << endl;
             }
             else break;
         }
     }
     from = currentUser;
-    cout << "Напишите свое сообщение, нажмите 'enter' для отправки: " << endl;
+    cout << "Write your message, press 'enter' to send: " << endl;
     while (getline(cin, text))
     {
         if (text != "") break;
     }
     _messages.emplace_back(from, to, text, timestamp);
-    cout << "Сообщение '" << text << "' от пользователя <" << from << "> пользователю <" << to << "> отправлено " << endl;
+    cout << "Message '" << text << "' from the user <" << from << "> to the user <" << to << "> sent" << endl;
     userMenu();
 }
 
@@ -184,19 +185,19 @@ template <typename T> void Chat<T>::showMessages(bool toAll)
         if (toAll)
         {
             if (text.getTo() == "all") {
-                cout << "<" << text.getFrom() << ">: " << "'" << text.getText() << "'" << " получено в " << ctime(&x) << endl;
+                cout << "<" << text.getFrom() << ">: " << "'" << text.getText() << "'" << " received in " << ctime(&x) << endl;
                 message_num++;
             }
         }
         else
         {
             if (currentUser == text.getTo() && currentUser != text.getFrom()) {
-                cout << "От <" << text.getFrom() << ">: " << "'" << text.getText() << "'" << " получено в " << ctime(&x) << endl;
+                cout << "From <" << text.getFrom() << ">: " << "'" << text.getText() << "'" << " received in " << ctime(&x) << endl;
                 message_num++;
             }
         }
     }
-    if (!message_num) cout << "Нет сообщений" << endl;
+    if (!message_num) cout << "No messages" << endl;
 }
 
 template <typename T> void Chat<T>::showAllMessagesWith()
@@ -204,11 +205,11 @@ template <typename T> void Chat<T>::showAllMessagesWith()
     T with;
     size_t message_num = 0;
     showUsersByLogin();
-    cout << "Введите логин получателя: " << endl;
+    cout << "Enter the recipient's login: " << endl;
     cin >> with;
     if (currentUser == with)
     {
-        cout << "Вы вводите свой собственный логин" << endl;
+        cout << "You enter your own login" << endl;
     }
     else
     {
@@ -218,18 +219,18 @@ template <typename T> void Chat<T>::showAllMessagesWith()
             if (currentUser == text.getFrom())
             {
                 cout << text.getFrom() << " >>> " << text.getTo() << ": " << text.getText()
-                    << " | получено в " << ctime(&x) << endl;
+                    << " | received in " << ctime(&x) << endl;
                 message_num++;
             }
             else if (currentUser == text.getTo())
             {
                 cout << text.getTo() << " <<< " << text.getFrom() << ": " << text.getText()
-                    << " | получено в " << ctime(&x) << endl;
+                    << " | received in " << ctime(&x) << endl;
                 message_num++;
             }
         }
     }
-    if (!message_num) cout << "Нет сообщений" << endl;
+    if (!message_num) cout << "No messages" << endl;
 }
 
 template <typename T> void Chat<T>::sentMessages()
@@ -239,8 +240,8 @@ template <typename T> void Chat<T>::sentMessages()
         {
             auto x = text.getTime();
             auto y = ctime(&x);
-            cout << "Сообщение для <" << text.getTo() << ">: " << "'" << text.getText() << "'"
-                << " получено в " << y << endl;
+            cout << "Message for <" << text.getTo() << ">: " << "'" << text.getText() << "'"
+                << " received in " << y << endl;
         }
 }
 
@@ -250,10 +251,10 @@ template <typename T> void Chat<T>::userMenu()
     {
         char user_choice;
         cout << endl;
-        cout << "\033[93m" << "************** Пользовательское меню: Выберите опцию: **************" << endl;
-        cout << "\033[93m" << "1 - Читать новые сообщения | 2 - Читать сообщения от... | 3 - Читать рассылки" << endl;
-        cout << "\033[93m" << "4 - Отправить сообщение | 5 - Отправить рассылку | 6 - Просмотр отправленных сообщений" << endl;
-        cout << "\033[93m" << "0 - Выход из системы / Начать сначала" << endl;
+        cout << "\033[93m" << "************** Custom Menu: Select an option: **************" << endl;
+        cout << "\033[93m" << "1 - Read new messages | 2 - Read messages from... | 3 - Read mailing lists" << endl;
+        cout << "\033[93m" << "4 - Send a message | 5 - Send a newsletter | 6 - View sent messages" << endl;
+        cout << "\033[93m" << "0 - Log Out / Start Over" << endl;
         cin >> user_choice;
         cout << endl;
         switch (user_choice)
@@ -281,7 +282,7 @@ template <typename T> void Chat<T>::userMenu()
             break;
         default:
             logoutOperation();
-            cout << "Неверный ввод. Попробуйте снова" << endl;
+            cout << "Invalid input. Try again" << endl;
         }
     }
     cout << endl;
@@ -295,10 +296,10 @@ template <typename T> void Chat<T>::runChat()
         system_clock::time_point today = system_clock::now();
         time_t tt;
         tt = system_clock::to_time_t(today);
-        cout << "Сегодня: " << ctime(&tt);
+        cout << "Today: " << ctime(&tt);
         char user_choise;
-        cout << "\033[0m" << "*********** Начальное меню: Выберите опцию: ***********" << endl;
-        cout << "\033[0m" << "   1 - Регистрация нового пользователя | 2 - Вход в систему | 0 - Выход" << endl;
+        cout << "\033[0m" << "*********** Start menu: Select the option: ***********" << endl;
+        cout << "\033[0m" << "   1 - Registering a new user | 2 - Logging in | 0 - Logging out" << endl;
         cin >> user_choise;
         cout << endl;
 
@@ -311,14 +312,14 @@ template <typename T> void Chat<T>::runChat()
             loginOperation();
             break;
         case '0':
-            cout << "Выход" << endl;
+            cout << "Exit" << endl;
             chat_enable = false;
             break;
         default:
-            cout << "Неверный ввод. Выход" << endl;
+            cout << "Invalid input. Exit" << endl;
             chat_enable = false;
             break;
         }
     }
-    cout << "Чат завершен! Увидимся снова!" << endl;
+    cout << "The chat is over! See you again!" << endl;
 }
